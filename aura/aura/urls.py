@@ -1,0 +1,11 @@
+# aura/urls.py
+from django.contrib import admin
+from django.urls import path, include
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    # The homepage is now handled by the landing app
+    path('', include('landing.urls')), 
+    # The main application now lives under the /app/ prefix
+    path('app/', include('core.urls')), 
+]

@@ -1,0 +1,29 @@
+{% extends "core/base.html" %}
+{% load static %} {# If you plan to add images later #}
+
+{% block content %}
+<div class="text-center py-20">
+    <h1 class="text-5xl font-extrabold text-white sm:text-6xl">
+        Welcome to <span class="text-cyan-400">AURA</span>
+    </h1>
+    <p class="mt-6 text-xl text-gray-400 max-w-2xl mx-auto">
+        The Multi-Agent System for Certified Operations.
+        Orchestrating a team of specialist agents to ensure compliance, safety, and auditability in complex physical tasks.
+    </p>
+    <div class="mt-10">
+        <a href="{% url 'core:job_list' %}" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-8 rounded-lg text-lg shadow-lg transform hover:scale-105 transition-transform duration-300">
+            Launch Supervisor App
+        </a>
+    </div>
+</div>
+
+<div class="mt-16 border-t border-gray-800 pt-10">
+    <h3 class="text-2xl font-semibold text-center text-white">Powered By</h3>
+    <div class="flex justify-center items-center space-x-8 mt-6 text-gray-500">
+        <span>Vultr</span>
+        <span>Groq</span>
+        <span>Snowflake</span>
+        <span>Coral Protocol</span>
+    </div>
+</div>
+{% endblock %}

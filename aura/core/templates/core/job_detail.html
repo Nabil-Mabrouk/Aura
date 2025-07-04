@@ -1,0 +1,48 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<a href="{% url 'core:job_list' %}" class="text-cyan-400 hover:text-cyan-300 mb-4 inline-block">← Back to Jobs</a>
+
+<div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+    <h2 class="text-2xl font-bold mb-1">Job Details</h2>
+    <p class="font-mono text-sm text-gray-500 mb-4">ID: {{ job.id }}</p>
+    <p class="mb-4"><strong>Status:</strong> <span id="job-status">{{ job.get_status_display }}</span></p>
+
+    <h3 class="text-xl font-semibold mb-2">Execution Log</h3>
+    <div id="log-container" class="bg-black p-4 rounded-md font-mono text-sm text-green-400 h-96 overflow-y-auto border border-gray-700">
+        <!-- Logs will be loaded here by JavaScript -->
+        <p>Loading log...</p>
+    </div>
+</div>
+
+<script>
+    const jobId = "{{ job.id }}";
+    const apiUrl = "{% url 'core:job_detail_log_api' job.id %}"; 
+    const logContainer = document.getElementById('log-container');
+    const jobStatusSpan = document.getElementById('job-status');
+
+    function fetchLogs() {
+        fetch(apiUrl)
+            .then(response => response.json())
+            .then(data => {
+                jobStatusSpan.textContent = data.status;
+                let logHtml = '';
+                data.logs.forEach(log => {
+                    const time = new Date(log.timestamp).toLocaleTimeString();
+                    logHtml += `<p><span class="text-gray-500">${time}</span> [<span class="text-cyan-400">${log.source}</span>] > ${log.message}</p>`;
+                });
+                logContainer.innerHTML = logHtml;
+                logContainer.scrollTop = logContainer.scrollHeight; // Auto-scroll to bottom
+
+                // Stop polling if the job is finished
+                if (data.status !== 'In Progress' && data.status !== 'Pending') {
+                    clearInterval(intervalId);
+                }
+            });
+    }
+
+    // Fetch logs immediately and then every 2 seconds
+    fetchLogs();
+    const intervalId = setInterval(fetchLogs, 1500);
+</script>
+{% endblock %}
