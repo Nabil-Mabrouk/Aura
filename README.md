@@ -66,19 +66,20 @@ graph TD
     subgraph Data Source
         G[Snowflake Warehouse]
     end
+
+    B -- "(1) Discover(vision)" --> C;
+    C -- "(2) Return Agent D" --> B;
+    B -- "(3) Invoke" --> D;
+    
+    B -- "(4) Discover(procedures)" --> C;
+    C -- "(5) Return Agent E" --> B;
+    B -- "(6) Invoke" --> E;
+    E -- "(7) SELECT * FROM PROCEDURES" --> G;
+    
+    B -- "(8) Discover(summarization)" --> C;
+    C -- "(9) Return Agent F" --> B;
+    B -- "(10) Invoke" --> F;
 ```
-    B -- "1. Discover(vision)" --> C;
-    C -- "2. Return Agent D" --> B;
-    B -- "3. Invoke" --> D;
-    
-    B -- "4. Discover(procedures)" --> C;
-    C -- "5. Return Agent E" --> B;
-    B -- "6. Invoke" --> E;
-    E -- "7. SELECT * FROM .." --> G;
-    
-    B -- "8. Discover(summarization)" --> C;
-    C -- "9. Return Agent F" --> B;
-    B -- "10. Invoke" --> F;
 ---
 
 ## 🏆 Tech Stack & Sponsor Integration
