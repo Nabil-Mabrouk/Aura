@@ -24,16 +24,9 @@ Here is a live demonstration of the AURA Supervisor orchestrating a full inciden
 
 ---
 
-## The Problem: The 3 AM Server Outage
+## The Problem: 
 
-When a critical server goes down in the middle of the night, an on-call engineer is paged. Their process is manual, stressful, and slow:
-1.  Acknowledge the alert.
-2.  Struggle to log in and find the right server.
-3.  Manually run diagnostic commands to find the root cause.
-4.  Scramble to find the correct, official procedure (the "runbook").
-5.  Execute the fix, hoping it's the right one.
-
-This process is prone to human error and costs valuable time, leading to extended downtime and a burnt-out team.
+..in progress
 
 ## Our Solution: AURA, The AI First-Responder
 
@@ -56,36 +49,36 @@ AURA is not a single application; it's a system of collaborating microservices, 
 
 ```mermaid
 graph TD
-    subgraph "Aura Supervisor (Django on Vultr)"
-        A[User Interface] --> B{Orchestration Logic};
+    subgraph Supervisor
+        A[User Interface] --> B{Aura Orchestrator};
     end
 
-    subgraph "Coral Protocol (Discovery Layer)"
-        C[Local Daemon]
+    subgraph Discovery Layer
+        C[Coral Protocol Daemon]
     end
     
-    subgraph "Specialist Agents (FastAPI on Vultr)"
+    subgraph Specialist Agents
         D[Identifier Agent];
         E[Procedure Agent];
         F[Summarizer Agent];
     end
     
-    subgraph "Enterprise Data Sources"
-        G[Snowflake Data Warehouse]
+    subgraph Data Source
+        G[Snowflake Warehouse]
     end
 
-    B -- 1. Discover Agent for "vision" --> C;
-    C -- 2. Returns Identifier Agent --> B;
-    B -- 3. Delegate Task --> D;
+    B -- "1. Discover(vision)" --> C;
+    C -- "2. Return Agent D" --> B;
+    B -- "3. Invoke" --> D;
     
-    B -- 4. Discover Agent for "procedures" --> C;
-    C -- 5. Returns Procedure Agent --> B;
-    B -- 6. Delegate Task --> E;
-    E -- 7. Query for SOP --> G;
+    B -- "4. Discover(procedures)" --> C;
+    C -- "5. Return Agent E" --> B;
+    B -- "6. Invoke" --> E;
+    E -- "7. SELECT * FROM .." --> G;
     
-    B -- 8. Discover Agent for "summarization" --> C;
-    C -- 9. Returns Summarizer Agent --> B;
-    B -- 10. Delegate Task --> F;
+    B -- "8. Discover(summarization)" --> C;
+    C -- "9. Return Agent F" --> B;
+    B -- "10. Invoke" --> F;
 ```
 
 ---
