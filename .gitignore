@@ -128,3 +128,7 @@ coral-studio/node_modules/
 # Ignore build artifacts
 coral-studio/build/
 coral-studio/.svelte-kit/
+
+# database/
+db.sqlite3
+database/db.sqlite3

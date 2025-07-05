@@ -1,0 +1,20 @@
+# Core Django framework
+Django==5.2.4
+djangorestframework==3.16.0 # Good practice for APIs
+asgiref==3.9.0
+sqlparse==0.5.3
+tzdata==2025.2
+
+# For making calls to the agents
+requests==2.32.4
+idna==3.10
+charset-normalizer==3.4.2
+urllib3==2.5.0
+certifi==2025.6.15
+
+# Production web server for Docker
+gunicorn==22.0.0 # Pinning a recent gunicorn version
+
+# For Background Tasks
+celery
+redis
