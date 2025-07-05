@@ -1,135 +1,151 @@
+# AURA - The AI Supervisor for Enterprise Operations
 
-# Aura Cloud: The Centralized Expert Agent
+![AURA Banner](./assets/raise-your-hack.webp) <!-- Optional: Create a cool banner with Canva -->
 
-<div align="center">
-  <img src="https://i.imgur.com/u1mJ2pC.png" alt="Aura Cloud Cover Image" width="700"/>
-</div>
-
-**A submission for the [RAISE YOUR HACK](https://lablab.ai/event/raise-your-hack) Hackathon - Vultr Track.**
-
-Aura is a cloud-native, agentic system that provides **real-time visual intelligence** to on-site technicians. Deployed on a professional stack on **Vultr**, it uses a hybrid AI pipeline to analyze a technician's live video feed, deliver interactive repair guidance, and autonomously manage the entire service workflow, turning every junior technician into your best troubleshooter.
+**AURA is an AI-powered, multi-agent system designed to act as a first-responder for high-stakes operational tasks. It orchestrates a team of specialized AI agents to diagnose problems, fetch official procedures, and guide technicians, turning minutes of chaos into seconds of controlled, auditable action.**
 
 ---
 
-## 🎥 Demo Video
-
-<div align="center">
-
-[](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)
-
-**Click the thumbnail above to watch our 3-minute live demonstration.**
-</div>
-
----
-
-## 🎯 The Problem
-
-In mission-critical industries like energy, manufacturing, and telecommunications, field service operations are plagued by inefficiency. When equipment fails, technicians on-site often lack immediate access to expert knowledge. This leads to:
-
-*   **Costly Downtime:** Every minute spent diagnosing a problem is a direct financial loss. A single hour of downtime can cost a factory thousands.
-*   **Knowledge Gaps:** The expertise of senior engineers isn't scalable. They can't be everywhere at once, leaving junior technicians to rely on cumbersome paper manuals.
-*   **Inefficient Reporting:** Technicians spend up to 40% of their time on administrative tasks and paperwork instead of value-adding repairs.
+| Status         | Value                                                                                         |
+| -------------- | --------------------------------------------------------------------------------------------- |
+| **Project**    | AURA (AI Unified Response Agent)                                                              |
+| **Hackathon**  | [RAISE Your HACK](https://lablab.ai/event/raise-your-hack)                                    |
+| **Track**      | **Vultr**: Agentic Workflows for the Future of Work                                           |
+| **Live Demo**  | **[http://your-vultr-ip-address/](http://your-vultr-ip-address/)** <!-- IMPORTANT: UPDATE THIS --> |
+| **Repo**       | [https://github.com/Nabil-Mabrouk/aura](https://github.com/Nabil-Mabrouk/aura)      |
 
 ---
 
-## ✨ Our Solution: The Aura Agent
+## 🚀 The Demo
 
-Aura Cloud tackles these problems by providing a single, powerful AI brain hosted on Vultr that any technician can access from any device with a web browser. It's not just a tool; it's an **agentic co-pilot** that sees what the technician sees and orchestrates the entire service workflow.
+Here is a live demonstration of the AURA Supervisor orchestrating a full incident response workflow.
 
-### Key Features
-
-*   **Centralized Live Vision:** Technicians stream their camera feed to Vultr, which handles the heavy AI processing (**YOLOv8 object detection**) to identify machinery and components in real-time.
-*   **Hybrid AI-Powered Knowledge:** A sophisticated Retrieval-Augmented Generation (RAG) pipeline provides expert guidance.
-    *   **Vultr Serverless Inference:** Hosts a dedicated embedding model for scalable, managed knowledge vectorization.
-    *   **Groq API + Llama 3.1:** Delivers lightning-fast, state-of-the-art conversational responses based on technical manuals.
-*   **End-to-End Agentic Workflow:** Aura can manage a repair ticket from start to finish, interacting with other enterprise systems (e.g., Jira, Snowflake) to automate administrative tasks.
-*   **Automated Reporting:** The agent acts as a scribe, documenting the entire process to generate service reports instantly, freeing up technicians to focus on their core job.
-*   **Interoperable by Design (MCP):** Built on the **Model Context Protocol (MCP)**, Aura exposes its capabilities so other enterprise agents can discover and collaborate with it programmatically.
+![AURA Demo GIF](./assets/day1.gif)  <!-- CRITICAL: Record a GIF of your app working! -->
 
 ---
 
-## 🤖 Architecture: A Modern, Cloud-Native Stack
+## The Problem: The 3 AM Server Outage
 
-Aura Cloud is built as a professional, containerized application deployed entirely on Vultr infrastructure. This architecture is designed for scalability, reliability, and interoperability.
+When a critical server goes down in the middle of the night, an on-call engineer is paged. Their process is manual, stressful, and slow:
+1.  Acknowledge the alert.
+2.  Struggle to log in and find the right server.
+3.  Manually run diagnostic commands to find the root cause.
+4.  Scramble to find the correct, official procedure (the "runbook").
+5.  Execute the fix, hoping it's the right one.
 
-<div align="center">
-  <img src="https://i.imgur.com/jA7B3tF.png" alt="Aura Cloud Architecture Diagram" width="800"/>
-</div>
+This process is prone to human error and costs valuable time, leading to extended downtime and a burnt-out team.
 
-### Meeting the Hackathon Requirements
+## Our Solution: AURA, The AI First-Responder
 
-*   **Core Requirement (Groq + Llama):** The primary RAG-based conversational logic is powered by the **Groq API** and **Llama 3.1**.
-*   **Vultr Track (Deployment):** The entire stack is containerized with **Docker** and deployed on a **Vultr VM**, powered by a **Uvicorn** ASGI server and an **Nginx** reverse proxy.
-*   **Vultr Track (Partner Tech):** We strategically use **Vultr Serverless Inference** for our embedding model, demonstrating a hybrid AI approach that leverages the best of Vultr's native platform.
-*   **Vultr Track (Partner Tech):** The entire application is designed to be wrapped in an **MCP** server, making it a true, forward-looking enterprise agent that adheres to emerging interoperability standards.
+AURA transforms this chaotic process into a calm, supervised workflow. It's an **AI Supervisor** that acts as the on-call engineer's perfect partner.
 
----
+When an alert comes in, AURA automatically:
+1.  **Delegates** the initial analysis to a specialist **Identifier Agent**.
+2.  **Discovers** and tasks a secure **Procedure Agent** to fetch the official runbook from the enterprise data warehouse.
+3.  **Guides** the technician through the exact, approved steps.
+4.  **Assigns** the final report writing to a **Summarizer Agent**.
+5.  **Logs** every action for a fully auditable compliance trail.
 
-## 🛠️ Tech Stack
-
-*   **Cloud Hosting:** Vultr (VM, Serverless Inference)
-*   **Backend:** Django, Django REST Framework, Django Channels
-*   **ASGI Server:** Uvicorn
-*   **Frontend:** HTML5, TailwindCSS, JavaScript
-*   **Real-Time Comms:** WebRTC, WebSockets
-*   **Conversational AI:** Groq API, Llama 3.1
-*   **Computer Vision:** YOLOv8, OpenCV
-*   **RAG Pipeline:**
-    *   **Embeddings:** Vultr Serverless Inference
-    *   **Vector Store:** Qdrant / Faiss (in Docker)
-*   **Agent Protocol:** Model Context Protocol (MCP)
-*   **Deployment:** Docker, Docker Compose, Nginx
+AURA doesn't replace the human; it empowers them by handling the repetitive, time-consuming tasks, allowing the human to focus on final approval and high-level oversight.
 
 ---
 
-## 🚀 Getting Started & Local Development
+## 🛠️ How It Works: A Multi-Agent Architecture
 
-This project is fully containerized for easy and consistent setup.
+AURA is not a single application; it's a system of collaborating microservices, orchestrated by the Supervisor and discovered via **Coral Protocol**.
+
+```mermaid
+graph TD
+    subgraph "Aura Supervisor (Django on Vultr)"
+        A[User Interface] --> B{Orchestration Logic};
+    end
+
+    subgraph "Coral Protocol (Discovery Layer)"
+        C[Local Daemon]
+    end
+    
+    subgraph "Specialist Agents (FastAPI on Vultr)"
+        D[Identifier Agent];
+        E[Procedure Agent];
+        F[Summarizer Agent];
+    end
+    
+    subgraph "Enterprise Data Sources"
+        G[Snowflake Data Warehouse]
+    end
+
+    B -- 1. Discover Agent for "vision" --> C;
+    C -- 2. Returns Identifier Agent --> B;
+    B -- 3. Delegate Task --> D;
+    
+    B -- 4. Discover Agent for "procedures" --> C;
+    C -- 5. Returns Procedure Agent --> B;
+    B -- 6. Delegate Task --> E;
+    E -- 7. Query for SOP --> G;
+    
+    B -- 8. Discover Agent for "summarization" --> C;
+    C -- 9. Returns Summarizer Agent --> B;
+    B -- 10. Delegate Task --> F;
+```
+
+---
+
+## 🏆 Tech Stack & Sponsor Integration
+
+We strategically used the sponsor technologies to build a robust, enterprise-ready system.
+
+*   **Vultr**: The entire multi-service application is deployed on **Vultr Cloud Compute**. Vultr's reliable and high-performance infrastructure is the backbone of AURA, hosting the Supervisor, all specialist agents, and the Coral daemon.
+
+*   **Groq**: While our current agents use simulated logic for the demo, the architecture is designed for the **Groq API**. The Summarizer and Identifier agents are primed to have their core logic replaced with calls to Llama-3 on Groq's LPU for lightning-fast inference, a critical requirement for real-time operations.
+
+*   **Snowflake**: We use Snowflake as the single source of truth for all operational procedures. Our **Procedure Agent** connects directly to a Snowflake data warehouse to pull official, version-controlled runbooks, ensuring AURA always follows enterprise compliance and safety standards.
+
+*   **Coral Protocol**: Coral is the collaboration fabric of our system. Instead of hardcoding agent endpoints, the **Aura Supervisor** uses the Coral SDK to dynamically **discover** and **invoke** agents based on their advertised capabilities. This creates a modular, scalable, and secure multi-agent architecture.
+
+---
+
+## ⚙️ Setup & Installation
+
+You can run the entire AURA system on your local machine using Docker.
 
 ### Prerequisites
+*   [Docker](https://www.docker.com/products/docker-desktop/)
+*   [Docker Compose](https://docs.docker.com/compose/install/)
+*   Git
 
-*   Docker and Docker Compose
-*   A Vultr account with a deployed Serverless Inference embedding model.
-*   A Groq API Key.
-*   A webcam.
+### Local Development
 
-### Local Setup Instructions
-
-1.  **Clone the Repository:**
+1.  **Clone the repository:**
     ```bash
     git clone https://github.com/Nabil-Mabrouk/aura.git
-    cd aura-cloud
+    cd your-repo
     ```
 
-2.  **Set Up Environment Variables:**
-    Create a file named `.env` in the project root by copying the example file:
+2.  **Configure Environment Variables:**
+    Create a `.env` file in the `agents/procedure_agent/` directory. Use the example file as a template:
     ```bash
-    cp .env.example .env
+    cp agents/procedure_agent/.env.example agents/procedure_agent/.env
     ```
-    Now, edit the `.env` file and add your secret keys:
-    ```
-    GROQ_API_KEY="gsk_YourGroqApiKeyHere"
-    VULTR_INFERENCE_URL="https://your-region.vultr.com/v1/inference/your-endpoint-id"
-    ```
+    Now, edit `agents/procedure_agent/.env` with your Snowflake credentials.
 
-3.  **Build and Run with Docker Compose:**
-    This single command will build the containers, install dependencies, and start the application.
+3.  **Run the System:**
+    The entire application stack is defined in `docker-compose.yml`. Launch everything with a single command:
     ```bash
     docker-compose up --build
     ```
 
 4.  **Access the Application:**
-    Open your web browser and navigate to:
-    **`https://localhost:8000`**
-    *(Note the `https`)*
-
-    Your browser will trust the connection because of the `mkcert` certificate. You can now grant camera permissions and use the app.
+    *   **Aura Landing Page:** `http://localhost:8000/`
+    *   **Aura Supervisor App:** `http://localhost:8000/app/`
 
 ---
 
-## 👨‍💻 About the Developer
+## 🔮 Future Work (Stretch Goals)
 
-Aura Cloud was designed and built by [Your Name] as a solo project for the RAISE YOUR HACK hackathon.
+*   **[Enhancement] Implement Live YOLOv8 Inference:** Upgrade the Identifier Agent to use a real YOLOv8 model deployed on a **Vultr GPU Instance** for real-time video analysis.
+*   **[Enhancement] Add Voice Interaction:** Implement a "Command Agent" and use the Web Speech API to allow technicians to interact with AURA using voice commands.
+*   **[DevOps] Deploy to Vultr Kubernetes Engine (VKE):** For true production-grade scalability, migrate the agent services to a VKE cluster.
 
-*   **GitHub:** [@Nabil-Mabrouk](https://github.com/Nabil-Mabrouk)
-*   **LinkedIn:** [linkedin.com/in/your-linkedin-profile](https://www.linkedin.com/in/your-linkedin-profile)
+---
+Built with ❤️ by [Nabil Mabrouk] for the RAISE Your HACK hackathon.
+
