@@ -67,7 +67,7 @@ graph TD
         G[Snowflake Warehouse]
     end
 
-    B -- "(1) Discover(vision)" --> C;
+    B  "(1) Discover(vision)" --> C;
     C -- "(2) Return Agent D" --> B;
     B -- "(3) Invoke" --> D;
     
