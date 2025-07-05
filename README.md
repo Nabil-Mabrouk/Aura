@@ -67,18 +67,18 @@ graph TD
         G[Snowflake Warehouse]
     end
 
-    B  "(1) Discover(vision)" --> C;
-    C -- "(2) Return Agent D" --> B;
-    B -- "(3) Invoke" --> D;
+    B --> C;
+    C --> B;
+    B --> D;
     
-    B -- "(4) Discover(procedures)" --> C;
-    C -- "(5) Return Agent E" --> B;
-    B -- "(6) Invoke" --> E;
-    E -- "(7) SELECT * FROM PROCEDURES" --> G;
+    B --> C;
+    C --> B;
+    B --> E;
+    E --> G;
     
-    B -- "(8) Discover(summarization)" --> C;
-    C -- "(9) Return Agent F" --> B;
-    B -- "(10) Invoke" --> F;
+    B --> C;
+    C --> B;
+    B --> F;
 ```
 ---
 
