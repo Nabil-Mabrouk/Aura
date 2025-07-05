@@ -98,3 +98,33 @@ Thumbs.db
 *.tmp
 
 .vincent
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+db.sqlite3
+
+
+
+# IDE / Editor folders
+.vscode/
+.idea/
+
+# --- IMPORTANT HACKATHON ADDITIONS ---
+# Ignore the cloned external dependency repositories
+coral-server/
+coral-studio/
+
+# Ignore local environment files
+.env
+agents/procedure_agent/.env
+
+# Ignore Node.js dependency folders
+node_modules/
+coral-studio/node_modules/
+
+# Ignore build artifacts
+coral-studio/build/
+coral-studio/.svelte-kit/

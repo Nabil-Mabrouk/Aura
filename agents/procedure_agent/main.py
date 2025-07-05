@@ -1,14 +1,37 @@
+# agents/procedure_agent/main.py
+
+# --- START OF ENVIRONMENT FIX ---
+# This block runs BEFORE any other imports to fix the "homeless" environment issue.
+import os
+import pathlib
+
+# Check if the HOME environment variable is missing.
+if not os.getenv("HOME") and not os.getenv("USERPROFILE"):
+    print("PROCEDURE AGENT: HOME/USERPROFILE not set. Attempting to set it automatically.")
+    try:
+        # Use pathlib to find the user's home directory in a cross-platform way.
+        home_dir = pathlib.Path.home()
+        # Set the environment variable for this process.
+        os.environ['USERPROFILE'] = str(home_dir)
+        os.environ['HOME'] = str(home_dir)
+        print(f"PROCEDURE AGENT: Successfully set HOME to {home_dir}")
+    except RuntimeError as e:
+        # If even pathlib fails, we cannot proceed.
+        print(f"PROCEDURE AGENT: CRITICAL ERROR - Could not determine home directory. {e}")
+        # Exit with an error code to prevent the server from starting incorrectly.
+        exit(1)
+# --- END OF ENVIRONMENT FIX ---
+
+
+# Now, with the environment fixed, we can safely import everything else.
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-import time
 import uvicorn
-
-import os
-import json # To parse the VARIANT data from Snowflake
+import json
 from dotenv import load_dotenv
 import snowflake.connector
 
-# Load environment variables from .env file
+# Load environment variables from .env file (for Snowflake credentials)
 load_dotenv()
 
 # --- Snowflake Connection Details from Environment ---
@@ -21,11 +44,10 @@ SNOWFLAKE_CREDS = {
     "schema": os.getenv("SNOWFLAKE_SCHEMA"),
 }
 
-# Define the input data model for type safety and validation
+# --- FastAPI Setup ---
 class ComponentRequest(BaseModel):
     component_name: str
 
-# Create the FastAPI app instance
 app = FastAPI(
     title="AURA Procedure Agent (Snowflake-Connected)",
     description="Fetches SOPs directly from an enterprise Snowflake data warehouse."
@@ -33,53 +55,34 @@ app = FastAPI(
 
 @app.post("/get_procedure")
 async def get_procedure(request: ComponentRequest):
-    """
-    Receives a component name, queries Snowflake, and returns the procedure.
-    """
+    # The rest of this function remains the same as our working version
     print(f"PROCEDURE AGENT: Received request for component: {request.component_name}")
     print("PROCEDURE AGENT: Connecting to Snowflake...")
-
-    conn = None  # Initialize conn to None
+    conn = None
     try:
         conn = snowflake.connector.connect(**SNOWFLAKE_CREDS)
         print("PROCEDURE AGENT: Snowflake connection successful.")
-        
         with conn.cursor() as cur:
-            # Use parameter binding to prevent SQL injection
             query = "SELECT procedure_id, steps, safety_warnings FROM PROCEDURES WHERE component_name = %s"
             cur.execute(query, (request.component_name,))
             result = cur.fetchone()
 
         if result is None:
-            print("PROCEDURE AGENT: No procedure found for this component.")
-            raise HTTPException(status_code=404, detail="Procedure not found for this component.")
-
-        print("PROCEDURE AGENT: Procedure found. Formatting response.")
+            raise HTTPException(status_code=404, detail="Procedure not found.")
         
-        # Unpack the result from the database
         procedure_id, steps_json, warnings_json = result
-        
-        # The VARIANT columns come back as JSON strings, so we parse them
-        steps_list = json.loads(steps_json)
-        warnings_list = json.loads(warnings_json)
-        
         procedure_data = {
             "procedure_id": procedure_id,
-            "steps": steps_list,
-            "safety_warnings": warnings_list,
-            "agent_name": "ProcedureAgent/v1.1-Snowflake" # Version bump!
+            "steps": json.loads(steps_json),
+            "safety_warnings": json.loads(warnings_json),
+            "agent_name": "ProcedureAgent/v1.2-SelfFixing"
         }
-        
         return procedure_data
     except snowflake.connector.Error as e:
-        print(f"PROCEDURE AGENT: Snowflake Error: {e}")
-        raise HTTPException(status_code=500, detail="Database connection error.")
+        raise HTTPException(status_code=500, detail=f"Database error: {e}")
     finally:
-        # Ensure the connection is always closed
         if conn and not conn.is_closed():
             conn.close()
-            print("PROCEDURE AGENT: Snowflake connection closed.")
 
-# This allows running the script directly
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8002)

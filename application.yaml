@@ -1,0 +1,28 @@
+# Note: PROJECT_DIR needs to be the absolute path to your aura_project folder
+# Example for Windows: "C:/Projects/x-Aura/aura_project"
+# Example for Mac/Linux: "/Users/yourname/Documents/aura_project"
+PROJECT_DIR: "C:\Projects\x-Aura>"
+
+applications:
+  - id: "aura-app"
+    name: "AURA Supervisor Application"
+    privacyKeys: ["default-key"]
+
+registry:
+  aura-identifier-agent:
+    runtime:
+      type: "executable"
+      command: ["bash", "-c", "source ${PROJECT_DIR}/venv/bin/activate && uvicorn main:app --host 127.0.0.1 --port 8001"]
+      workingDirectory: "${PROJECT_DIR}/agents/identifier_agent"
+
+  aura-procedure-agent:
+    runtime:
+      type: "executable"
+      command: ["bash", "-c", "source ${PROJECT_DIR}/venv/bin/activate && uvicorn main:app --host 127.0.0.1 --port 8002"]
+      workingDirectory: "${PROJECT_DIR}/agents/procedure_agent"
+
+  aura-summarizer-agent:
+    runtime:
+      type: "executable"
+      command: ["bash", "-c", "source ${PROJECT_DIR}/venv/bin/activate && uvicorn main:app --host 127.0.0.1 --port 8003"]
+      workingDirectory: "${PROJECT_DIR}/agents/summarizer_agent"

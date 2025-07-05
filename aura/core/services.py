@@ -1,74 +1,39 @@
-# aura/core/services.py
 import requests
-import time
-
-# --- Agent Endpoints (Now the first one is real!) ---
-IDENTIFIER_AGENT_URL = "http://127.0.0.1:8001/identify"
-PROCEDURE_AGENT_URL = "http://127.0.0.1:8002/get_procedure"
-SUMMARIZER_AGENT_URL = "http://127.0.0.1:8003/summarize"
 
 class AgentInteractionError(Exception):
-    """Custom exception for when an agent fails."""
+    """Custom exception for all agent communication failures."""
     pass
 
-def call_identifier_agent(image_data=None):
-    """
-    Calls the REAL Identifier Agent to identify a component.
-    """
+def call_identifier_agent():
+    """Calls the Identifier Agent, which has been launched by the Coral Server."""
     try:
-        print("SUPERVISOR: Calling Identifier Agent at", IDENTIFIER_AGENT_URL)
-        
-        # --- THIS IS THE CHANGE ---
-        # The 'files' part is how you'd send a real file. Even though our
-        # agent ignores it, it's good practice to send it.
-        response = requests.post(IDENTIFIER_AGENT_URL, files={'image': b'fake_image_bytes'})
-        
-        # Check if the request was successful
-        response.raise_for_status() 
-        
-        # Return the JSON response from the agent
+        url = "http://127.0.0.1:8001/identify"
+        print(f"SUPERVISOR: Calling Identifier Agent directly at {url}...")
+        # The agent expects a JSON payload. We send a placeholder.
+        response = requests.post(url, json={'image_placeholder': 'simulated_image.jpg'})
+        response.raise_for_status()  # Raise an exception for HTTP error codes
         return response.json()
-
     except requests.RequestException as e:
-        # This will now catch errors if the agent isn't running!
-        raise AgentInteractionError(f"Identifier Agent failed: {e}")
+        raise AgentInteractionError(f"Identifier Agent at {url} failed: {e}")
 
-def call_procedure_agent(component_name):
-    """
-    Calls the REAL Procedure Agent to get the official runbook/SOP.
-    """
+def call_procedure_agent(component_name: str):
+    """Calls the Procedure Agent (launched by Coral) to query Snowflake."""
     try:
-        print(f"SUPERVISOR: Calling Procedure Agent for component: {component_name} at {PROCEDURE_AGENT_URL}")
-        
-        # --- THIS IS THE CHANGE ---
-        # We send a JSON payload this time
-        response = requests.post(PROCEDURE_AGENT_URL, json={'component_name': component_name})
-        
-        # Check if the request was successful
-        response.raise_for_status() 
-        
-        # Return the JSON response from the agent
-        return response.json()
-
-    except requests.RequestException as e:
-        raise AgentInteractionError(f"Procedure Agent failed: {e}")
-
-
-def call_summarizer_agent(job_log_text):
-    """
-    Calls the REAL Summarizer Agent to create a final report.
-    """
-    try:
-        print(f"SUPERVISOR: Calling Summarizer Agent at {SUMMARIZER_AGENT_URL}...")
-        
-        # We send the full log history as a JSON payload
-        response = requests.post(SUMMARIZER_AGENT_URL, json={'log_text': job_log_text})
-        
-        # Check if the request was successful
+        url = "http://127.0.0.1:8002/get_procedure"
+        print(f"SUPERVISOR: Calling Procedure Agent directly at {url}...")
+        response = requests.post(url, json={'component_name': component_name})
         response.raise_for_status()
-        
-        # Return the JSON response from the agent
         return response.json()
-        
     except requests.RequestException as e:
-        raise AgentInteractionError(f"Summarizer Agent failed: {e}")
+        raise AgentInteractionError(f"Procedure Agent at {url} failed: {e}")
+
+def call_summarizer_agent(job_log_text: str):
+    """Calls the Summarizer Agent, which has been launched by the Coral Server."""
+    try:
+        url = "http://127.0.0.1:8003/summarize"
+        print(f"SUPERVISOR: Calling Summarizer Agent directly at {url}...")
+        response = requests.post(url, json={'log_text': job_log_text})
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException as e:
+        raise AgentInteractionError(f"Summarizer Agent at {url} failed: {e}")
