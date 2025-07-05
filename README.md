@@ -66,7 +66,7 @@ graph TD
     subgraph Data Source
         G[Snowflake Warehouse]
     end
-
+```
     B -- "1. Discover(vision)" --> C;
     C -- "2. Return Agent D" --> B;
     B -- "3. Invoke" --> D;
@@ -79,8 +79,6 @@ graph TD
     B -- "8. Discover(summarization)" --> C;
     C -- "9. Return Agent F" --> B;
     B -- "10. Invoke" --> F;
-```
-
 ---
 
 ## 🏆 Tech Stack & Sponsor Integration
