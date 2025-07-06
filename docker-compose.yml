@@ -15,18 +15,21 @@ services:
     ports:
       - "8000:8000"
     command: ["/app/startup.sh"]
+    volumes:
+      # Mount the host's ./database folder into the container's /app/database folder
+      - ./database:/app/database
     environment:
       - DJANGO_SETTINGS_MODULE=aura.settings
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
-    volumes:
-      # Mount the host's ./database folder into the container's /app/database folder
-      - ./database:/app/database
+    # CRITICAL: This allows the container to communicate with agents on the host
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       - redis
-      - identifier_agent
-      - procedure_agent
-      - summarizer_agent
+    #  - identifier_agent
+    #  - procedure_agent
+    #  - summarizer_agent
 
   # The NEW Celery Worker Service
   celery_worker:
@@ -35,42 +38,45 @@ services:
       dockerfile: ../Dockerfile.supervisor
     # This command starts the celery worker process
     command: ["celery", "-A", "aura", "worker", "-l", "info"]
+    volumes:
+      # Mount the host's ./database folder into the container's /app/database folder
+      - ./database:/app/database
     environment:
       - DJANGO_SETTINGS_MODULE=aura.settings
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
-    volumes:
-      # Mount the host's ./database folder into the container's /app/database folder
-      - ./database:/app/database
+        # CRITICAL: Also needed for the worker if it calls agents directly
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       - redis
 
   # The Identifier Agent Service
-  identifier_agent:
-    build:
-      context: ./agents/identifier_agent
-      dockerfile: ../../Dockerfile.agent
-    ports:
-      - "8001:8001"
-    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]
+  # identifier_agent:
+  #   build:
+  #     context: ./agents/identifier_agent
+  #     dockerfile: ../../Dockerfile.agent
+  #   ports:
+  #     - "8001:8001"
+  #   command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]
 
   # The Procedure Agent Service
-  procedure_agent:
-    build:
-      context: ./agents/procedure_agent
-      dockerfile: ../../Dockerfile.agent
-    ports:
-      - "8002:8002"
-    # We pass the .env file into the container
-    env_file:
-      - ./agents/procedure_agent/.env
-    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8002"]
+  # procedure_agent:
+  #   build:
+  #     context: ./agents/procedure_agent
+  #     dockerfile: ../../Dockerfile.agent
+  #   ports:
+  #     - "8002:8002"
+  #   # We pass the .env file into the container
+  #   env_file:
+  #     - ./agents/procedure_agent/.env
+  #   command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8002"]
 
   # The Summarizer Agent Service
-  summarizer_agent:
-    build:
-      context: ./agents/summarizer_agent
-      dockerfile: ../../Dockerfile.agent
-    ports:
-      - "8003:8003"
-    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8003"]
+  # summarizer_agent:
+  #   build:
+  #     context: ./agents/summarizer_agent
+  #     dockerfile: ../../Dockerfile.agent
+  #   ports:
+  #     - "8003:8003"
+  #   command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8003"]

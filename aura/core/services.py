@@ -3,10 +3,16 @@ import requests
 
 # --- NEW DOCKER-FRIENDLY ENDPOINTS ---
 # The hostname is now the service name from docker-compose.yml
+# AGENT_ENDPOINTS = {
+#     "identifier": "http://identifier_agent:8001/identify",
+#     "procedure": "http://procedure_agent:8002/get_procedure",
+#     "summarizer": "http://summarizer_agent:8003/summarize"
+# }
 AGENT_ENDPOINTS = {
-    "identifier": "http://identifier_agent:8001/identify",
-    "procedure": "http://procedure_agent:8002/get_procedure",
-    "summarizer": "http://summarizer_agent:8003/summarize"
+    "identifier": "http://host.docker.internal:8001/identify",
+    "procedure": "http://host.docker.internal:8002/get_procedure",
+    "summarizer": "http://host.docker.internal:8003/summarize",
+    "command": "http://host.docker.internal:8004/parse_command" # For Day 3
 }
 # ... the rest of the file remains exactly the same ...
 # (The functions will now use these new URLs)
