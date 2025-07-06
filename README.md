@@ -55,36 +55,28 @@ AURA is not a single application; it's a dynamic system of collaborating microse
 
 ```mermaid
 graph TD
-    subgraph Supervisor (Django/Python)
+    subgraph Supervisor
         A[User Interface] --> B{Aura Orchestration Logic};
     end
 
-    subgraph Agent Discovery & Orchestration (Coral Protocol)
+    subgraph Agent Discovery and Orchestration
         C[Coral Server Engine]
     end
     
-    subgraph Specialist Agents (FastAPI/Python)
-        D[Identifier Agent (Port 8001)];
-        E[Procedure Agent (Port 8002)];
-        F[Summarizer Agent (Port 8003)];
+    subgraph Specialist Agents
+        D[Identifier Agent]
+        E[Procedure Agent]
+        F[Summarizer Agent]
     end
     
     subgraph External Data Sources
         G[Snowflake Data Warehouse]
     end
 
-    B -- "(1) Request Capability" --> C;
-    C -- "(2) Return Agent Info" --> B;
-    B -- "(3) Invoke Agent (HTTP)" --> D;
-    
-    B -- "(4) Request Capability" --> C;
-    C -- "(5) Return Agent Info" --> B;
-    B -- "(6) Invoke Agent (HTTP)" --> E;
-    E -- "(7) Query SQL" --> G;
-    
-    B -- "(8) Request Capability" --> C;
-    C -- "(9) Return Agent Info" --> B;
-    B -- "(10) Invoke Agent (HTTP)" --> F;
+    B -- "Invoke Identifier" --> D;
+    B -- "Invoke Procedure" --> E;
+    E -- "Query SQL" --> G;
+    B -- "Invoke Summarizer" --> F;
 ```
 
 ---
