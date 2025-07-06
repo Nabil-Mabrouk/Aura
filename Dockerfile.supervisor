@@ -15,11 +15,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the entire Django project code into the container
 COPY . .
 
-RUN chmod +x aura/startup.sh
+# --- CORRECTED PATH: Make the startup script executable ---
+RUN chmod +x startup.sh
 
 # Expose the port the app runs on
 EXPOSE 8000
 
-# Run gunicorn as the production server
-# This is more robust than the Django development server.
-CMD ["gunicorn", "aura.wsgi:application", "--bind", "0.0.0.0:8000"]
+# --- CORRECTED PATH: Run the startup script ---
+CMD ["/app/startup.sh"]
