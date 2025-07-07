@@ -15,6 +15,13 @@ certifi==2025.6.15
 # Production web server for Docker
 gunicorn==22.0.0 # Pinning a recent gunicorn version
 
-# For Background Tasks
-celery
-redis
+# # For Background Tasks
+# celery
+# redis
+
+groq
+python-dotenv
+
+ultralytics
+opencv-python-headless
+Pillow

@@ -1,48 +1,239 @@
 {% extends "core/base.html" %}
 
 {% block content %}
-<a href="{% url 'core:job_list' %}" class="text-cyan-400 hover:text-cyan-300 mb-4 inline-block">← Back to Jobs</a>
+<header class="flex justify-between items-center mb-6 pb-4 border-b border-gray-800">
+    <div>
+        <h2 class="text-4xl font-bold tracking-tighter">AURA Session</h2>
+        <p class="font-mono text-sm text-gray-500">{{ job.id }}</p>
+    </div>
+    <a href="{% url 'core:job_list' %}" class="text-sm text-gray-400 hover:text-white transition-colors">← Back to Session List</a>
+</header>
 
-<div class="bg-gray-800 p-6 rounded-lg shadow-lg">
-    <h2 class="text-2xl font-bold mb-1">Job Details</h2>
-    <p class="font-mono text-sm text-gray-500 mb-4">ID: {{ job.id }}</p>
-    <p class="mb-4"><strong>Status:</strong> <span id="job-status">{{ job.get_status_display }}</span></p>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    
+    <!-- Left Column: Visuals and Input -->
+    <div class="flex flex-col space-y-6">
+        <!-- Image Display Area -->
+        <div class="bg-gray-900 border border-gray-800 rounded-lg p-4">
+            <h3 class="text-lg font-bold mb-2 text-gray-400 uppercase tracking-wider">Visual Feed</h3>
+            <div id="image-display-area" class="relative bg-black h-80 flex items-center justify-center border border-dashed border-gray-700">
+                <p id="image-placeholder" class="text-gray-600">Upload an image to begin...</p>
+                <img id="display-image" class="hidden object-contain h-full w-full" />
+                <!-- This canvas will be used for the mouse-tracking animation and later for drawing bounding boxes -->
+                <canvas id="overlay-canvas" class="absolute top-0 left-0 w-full h-full"></canvas>
+            </div>
+        </div>
 
-    <h3 class="text-xl font-semibold mb-2">Execution Log</h3>
-    <div id="log-container" class="bg-black p-4 rounded-md font-mono text-sm text-green-400 h-96 overflow-y-auto border border-gray-700">
-        <!-- Logs will be loaded here by JavaScript -->
-        <p>Loading log...</p>
+        <!-- Input Area -->
+        <div class="bg-gray-900 border border-gray-800 rounded-lg p-4">
+            <h3 class="text-lg font-bold mb-2 text-gray-400 uppercase tracking-wider">Technician Input</h3>
+            <div class="space-y-4">
+                <div>
+                    <label for="image-upload" class="block mb-1 text-sm text-gray-500">1. Select Image File:</label>
+                    <input type="file" id="image-upload" accept="image/*" class="w-full text-sm text-gray-300
+                        file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold
+                        file:bg-gray-700 file:text-white hover:file:bg-gray-600 cursor-pointer" />
+                </div>
+                <div>
+                    <label class="block mb-1 text-sm text-gray-500">2. Record Instruction / Question:</label>
+                    <div class="flex items-center space-x-4">
+                        <button id="talk-btn" class="bg-gray-700 text-white font-bold py-2 px-4 rounded-md hover:bg-gray-600 transition-colors w-32 text-center">HOLD TO TALK</button>
+                        <p id="speech-status" class="text-yellow-500 font-mono text-sm">STATUS: IDLE</p>
+                    </div>
+                    <p id="transcribed-text" class="mt-2 h-8 p-1 font-mono text-gray-300 border border-gray-700 bg-black text-sm"></p>
+                </div>
+                <button id="send-btn" class="bg-white text-black w-full font-bold py-3 rounded-md text-lg hover:bg-gray-200 transition-colors">SEND TO AURA</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Log and Status -->
+    <div class="bg-gray-900 border border-gray-800 rounded-lg p-4 flex flex-col">
+        <h3 class="text-lg font-bold mb-2 text-gray-400 uppercase tracking-wider">Session Log</h3>
+        <p class="mb-2 text-sm"><strong>STATUS:</strong> <span id="job-status">{{ job.get_status_display }}</span></p>
+        <div id="log-container" class="bg-black p-2 flex-grow h-[42rem] overflow-y-auto font-mono text-sm">
+            <p class="text-gray-600">// Awaiting session start...</p>
+        </div>
     </div>
 </div>
 
 <script>
-    const jobId = "{{ job.id }}";
-    const apiUrl = "{% url 'core:job_detail_log_api' job.id %}"; 
-    const logContainer = document.getElementById('log-container');
-    const jobStatusSpan = document.getElementById('job-status');
+// --- GLOBAL STATE & ELEMENT REFERENCES ---
+const jobId = "{{ job.id }}";
+let imageBase64 = null;
+let lastLogCount = 0; // For tracking new logs to speak
 
-    function fetchLogs() {
-        fetch(apiUrl)
-            .then(response => response.json())
-            .then(data => {
-                jobStatusSpan.textContent = data.status;
-                let logHtml = '';
-                data.logs.forEach(log => {
-                    const time = new Date(log.timestamp).toLocaleTimeString();
-                    logHtml += `<p><span class="text-gray-500">${time}</span> [<span class="text-cyan-400">${log.source}</span>] > ${log.message}</p>`;
-                });
-                logContainer.innerHTML = logHtml;
-                logContainer.scrollTop = logContainer.scrollHeight; // Auto-scroll to bottom
+const imageUpload = document.getElementById('image-upload');
+const displayImage = document.getElementById('display-image');
+const imagePlaceholder = document.getElementById('image-placeholder');
+const talkBtn = document.getElementById('talk-btn');
+const speechStatus = document.getElementById('speech-status');
+const transcribedText = document.getElementById('transcribed-text');
+const sendBtn = document.getElementById('send-btn');
+const logContainer = document.getElementById('log-container');
+const jobStatusSpan = document.getElementById('job-status');
+const canvas = document.getElementById('overlay-canvas');
+const ctx = canvas.getContext('2d');
+const imageArea = document.getElementById('image-display-area');
 
-                // Stop polling if the job is finished
-                if (data.status !== 'In Progress' && data.status !== 'Pending') {
-                    clearInterval(intervalId);
-                }
-            });
+// --- CANVAS & MOUSE ANIMATION ---
+function resizeCanvas() {
+    canvas.width = imageArea.clientWidth;
+    canvas.height = imageArea.clientHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+let mouse = { x: null, y: null };
+imageArea.addEventListener('mousemove', (event) => {
+    const rect = canvas.getBoundingClientRect();
+    mouse.x = event.clientX - rect.left;
+    mouse.y = event.clientY - rect.top;
+});
+imageArea.addEventListener('mouseleave', () => { mouse.x = null; mouse.y = null; });
+
+function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (mouse.x !== null && mouse.y !== null) {
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(0, mouse.y); ctx.lineTo(canvas.width, mouse.y);
+        ctx.moveTo(mouse.x, 0); ctx.lineTo(mouse.x, canvas.height);
+        ctx.stroke();
+        ctx.strokeRect(mouse.x - 10, mouse.y - 10, 20, 20);
+    }
+    requestAnimationFrame(animate);
+}
+animate();
+
+// --- IMAGE HANDLING ---
+imageUpload.addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            imageBase64 = e.target.result;
+            displayImage.src = imageBase64;
+            displayImage.classList.remove('hidden');
+            imagePlaceholder.classList.add('hidden');
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+// --- SPEECH RECOGNITION (LISTEN) ---
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (SpeechRecognition) {
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.lang = 'en-US';
+    recognition.interimResults = true;
+
+    recognition.onstart = () => { speechStatus.textContent = "STATUS: LISTENING..."; talkBtn.classList.add('animate-pulse', 'bg-red-500'); };
+    recognition.onend = () => { speechStatus.textContent = "STATUS: PROCESSING..."; talkBtn.classList.remove('animate-pulse', 'bg-red-500'); };
+    recognition.onerror = (event) => { speechStatus.textContent = `ERROR: ${event.error}`; talkBtn.classList.remove('animate-pulse', 'bg-red-500'); };
+
+    recognition.onresult = (event) => {
+        const transcript = Array.from(event.results)
+            .map(result => result[0]).map(result => result.transcript).join('');
+        transcribedText.textContent = transcript;
+    };
+
+    talkBtn.addEventListener('mousedown', () => recognition.start());
+    talkBtn.addEventListener('mouseup', () => recognition.stop());
+} else {
+    talkBtn.textContent = "NOT SUPPORTED";
+    talkBtn.disabled = true;
+}
+
+// --- TEXT-TO-SPEECH (SPEAK) ---
+function speak(text) {
+    if ('speechSynthesis' in window && text) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US'; // <-- Set the language for the voice
+        utterance.rate = 0.9;
+        window.speechSynthesis.speak(utterance);
+    }
+}
+
+// --- SEND TO AURA ---
+sendBtn.addEventListener('click', async () => {
+    const text = transcribedText.textContent;
+    if (!imageBase64 && !text) {
+        alert("Please provide an image and/or a voice instruction.");
+        return;
+    }
+    
+    speechStatus.textContent = "STATUS: SENDING TO AURA...";
+    sendBtn.disabled = true;
+    sendBtn.textContent = "AURA IS THINKING...";
+    
+    const formData = new FormData();
+    formData.append('text', text);
+    if (imageBase64) {
+        const fetchRes = await fetch(imageBase64);
+        const blob = await fetchRes.blob();
+        formData.append('image', blob, 'upload.jpg');
     }
 
-    // Fetch logs immediately and then every 2 seconds
-    fetchLogs();
-    const intervalId = setInterval(fetchLogs, 1500);
+    try {
+        const response = await fetch(`/app/api/job/${jobId}/interact/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' }, 
+            body: formData
+        });
+        if (!response.ok) throw new Error(`Server responded with ${response.status}`);
+        
+        // Clear inputs for the next turn. Don't clear image for context.
+        transcribedText.textContent = '';
+        fetchLogs(); // Immediately fetch logs to show user's message
+    } catch (error) {
+        console.error('Error sending data to AURA:', error);
+        speechStatus.textContent = `ERROR: ${error.message}`;
+    } finally {
+        sendBtn.disabled = false;
+        sendBtn.textContent = "SEND TO AURA";
+        speechStatus.textContent = "STATUS: IDLE";
+    }
+});
+
+// --- LOG POLLING & UI UPDATES ---
+function fetchLogs() {
+    fetch(`/app/api/job/${jobId}/log/`)
+        .then(response => response.json())
+        .then(data => {
+            jobStatusSpan.textContent = data.status;
+            let logHtml = '';
+            
+            data.logs.forEach(log => {
+                const time = new Date(log.timestamp).toLocaleTimeString('en-US', { hour12: false });
+                const sourceColor = log.source === 'USER' ? 'text-yellow-400' : 'text-cyan-400';
+                logHtml += `<p><span class="text-gray-600">${time}</span> [<span class="${sourceColor}">${log.source}</span>] > ${log.message}</p>`;
+            });
+            logContainer.innerHTML = logHtml;
+
+            // Speak new messages from Aura
+            if (data.logs.length > lastLogCount) {
+                const newLogs = data.logs.slice(lastLogCount);
+                newLogs.forEach(log => {
+                    if (log.source === 'AURA') {
+                        speak(log.message);
+                    }
+                });
+            }
+            lastLogCount = data.logs.length;
+            
+            logContainer.scrollTop = logContainer.scrollHeight;
+
+            if (data.status !== 'IN_PROGRESS') {
+                clearInterval(intervalId);
+            }
+        });
+}
+
+// Initial fetch and start polling
+fetchLogs();
+const intervalId = setInterval(fetchLogs, 2500);
 </script>
 {% endblock %}

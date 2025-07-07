@@ -1,29 +1,30 @@
 {% extends "core/base.html" %}
-{% load static %} {# If you plan to add images later #}
 
 {% block content %}
-<div class="text-center py-20">
-    <h1 class="text-5xl font-extrabold text-white sm:text-6xl">
-        Welcome to <span class="text-cyan-400">AURA</span>
+<div class="flex flex-col items-center justify-center min-h-[85vh] text-center">
+    
+    <h1 class="text-6xl md:text-8xl font-bold tracking-tighter">
+        AURA
     </h1>
-    <p class="mt-6 text-xl text-gray-400 max-w-2xl mx-auto">
-        The Multi-Agent System for Certified Operations.
-        Orchestrating a team of specialist agents to ensure compliance, safety, and auditability in complex physical tasks.
+
+    <p class="mt-4 text-xl text-gray-300 max-w-3xl mx-auto">
+        The AI-Powered Supervisor for High-Stakes Enterprise Operations.
     </p>
-    <div class="mt-10">
-        <a href="{% url 'core:job_list' %}" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-8 rounded-lg text-lg shadow-lg transform hover:scale-105 transition-transform duration-300">
-            Launch Supervisor App
-        </a>
+    <p class="mt-2 text-md text-gray-500 max-w-2xl mx-auto">
+        Orchestrating a team of specialized AI agents to see, listen, think, and speak.
+    </p>
+
+    <div class="mt-12">
+        <form action="{% url 'core:create_job_session' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="bg-white text-black font-bold text-xl px-10 py-4 rounded-md shadow-lg transform hover:scale-105 transition-transform duration-300">
+                Start New Session
+            </button>
+        </form>
     </div>
 </div>
 
-<div class="mt-16 border-t border-gray-800 pt-10">
-    <h3 class="text-2xl font-semibold text-center text-white">Powered By</h3>
-    <div class="flex justify-center items-center space-x-8 mt-6 text-gray-500">
-        <span>Vultr</span>
-        <span>Groq</span>
-        <span>Snowflake</span>
-        <span>Coral Protocol</span>
-    </div>
-</div>
+<footer class="absolute bottom-4 w-full text-center text-xs text-gray-700">
+    <p>A RAISE Your HACK Project by Nabil Mabrouk</p>
+</footer>
 {% endblock %}

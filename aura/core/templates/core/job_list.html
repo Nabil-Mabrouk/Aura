@@ -1,38 +1,54 @@
 {% extends "core/base.html" %}
 
 {% block content %}
-<div class="flex justify-between items-center mb-4">
-    <h2 class="text-2xl font-semibold">Operational Jobs</h2>
-    <form action="{% url 'core:create_and_run_job' %}" method="post">
+<header class="flex justify-between items-center mb-8 pb-4 border-b border-gray-800">
+    <div>
+        <h2 class="text-4xl font-bold tracking-tighter">AURA Sessions</h2>
+        <a href="{% url 'landing:landing_page' %}" class="text-sm text-gray-400 hover:text-white transition-colors">← Back to Home</a>
+    </div>
+    <form action="{% url 'core:create_job_session' %}" method="post">
         {% csrf_token %}
-        <button type="submit" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded">
-            + Start New Job
+        <button type="submit" class="bg-white text-black font-bold py-2 px-5 rounded-md hover:bg-gray-200 transition-colors">
+            + New Session
         </button>
     </form>
-</div>
+</header>
 
-<div class="bg-gray-800 rounded-lg shadow">
-    <ul class="divide-y divide-gray-700">
-        {% for job in jobs %}
-            <a href="{% url 'core:job_detail' job.id %}" class="block p-4 hover:bg-gray-700">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="font-mono text-sm text-gray-400">JOB ID: {{ job.id }}</p>
-                        <p class="text-lg font-semibold">{{ job.title }}</p>
-                    </div>
-                    <span class="px-3 py-1 text-sm font-semibold rounded-full
-                        {% if job.status == 'COMPLETED' %} bg-green-500/20 text-green-400
-                        {% elif job.status == 'IN_PROGRESS' %} bg-yellow-500/20 text-yellow-400
-                        {% elif job.status == 'FAILED' %} bg-red-500/20 text-red-400
-                        {% else %} bg-gray-500/20 text-gray-400
-                        {% endif %}">
-                        {{ job.get_status_display }}
-                    </span>
-                </div>
-            </a>
-        {% empty %}
-            <p class="p-4 text-gray-500">No jobs have been started yet.</p>
-        {% endfor %}
-    </ul>
+<div class="bg-gray-900 border border-gray-800 rounded-lg shadow-md overflow-hidden">
+    <table class="w-full text-left">
+        <thead class="bg-gray-800 text-gray-400 text-sm uppercase">
+            <tr>
+                <th class="p-4">Session ID</th>
+                <th class="p-4">Created</th>
+                <th class="p-4">Last Updated</th>
+                <th class="p-4 text-center">Status</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-800">
+            {% for job in jobs %}
+                <tr class="hover:bg-gray-800/50 cursor-pointer group" onclick="window.location.href='{% url 'core:job_detail' job.id %}'">
+                    <td class="p-4 font-mono text-sm text-gray-400 group-hover:text-white">{{ job.id }}</td>
+                    <td class="p-4">{{ job.created_at|date:"Y-m-d H:i" }}</td>
+                    <td class="p-4">{{ job.updated_at|date:"Y-m-d H:i" }}</td>
+                    <td class="p-4 text-center">
+                        <span class="px-2 py-1 text-xs font-semibold rounded
+                            {% if job.status == 'COMPLETED_SUCCESS' %} bg-green-500/20 text-green-400
+                            {% elif job.status == 'IN_PROGRESS' %} bg-yellow-500/20 text-yellow-400
+                            {% elif job.status == 'COMPLETED_FAILURE' %} bg-red-500/20 text-red-400
+                            {% else %} bg-gray-600/20 text-gray-400
+                            {% endif %}">
+                            {{ job.get_status_display }}
+                        </span>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center p-12 text-gray-500">
+                        No active sessions. Start a new session to begin.
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}

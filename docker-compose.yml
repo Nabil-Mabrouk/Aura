@@ -1,82 +1,25 @@
 version: '3.8'
 
 services:
-  # The Redis message broker
-  redis:
-    image: "redis:alpine"
-    ports:
-      - "6379:6379"
-
-  # The Django Supervisor Service (no changes here)
+  # The Django Supervisor Service is now the only service managed by Docker.
   supervisor:
     build:
-      context: ./aura
+      context: ./aura  # Ensure this matches the case-sensitive name of your Django project folder
       dockerfile: ../Dockerfile.supervisor
     ports:
+      # Expose port 8000 to the host machine so Nginx can proxy to it.
       - "8000:8000"
+    # The command to run when the container starts. It applies migrations and starts Gunicorn.
     command: ["/app/startup.sh"]
+    # Mount the 'database' directory to persist the SQLite file.
     volumes:
-      # Mount the host's ./database folder into the container's /app/database folder
       - ./database:/app/database
+      # Mount the 'media' directory to persist user-uploaded images.
+      - ./media:/app/media
     environment:
-      - DJANGO_SETTINGS_MODULE=aura.settings
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
-    # CRITICAL: This allows the container to communicate with agents on the host
+      # Tell Django which settings file to use.
+      - DJANGO_SETTINGS_MODULE=aura.settings # Ensure 'Aura' matches your Django config folder name
+    # CRITICAL: This allows the container to communicate with agents
+    # running on the host machine (which are launched by Coral).
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    depends_on:
-      - redis
-    #  - identifier_agent
-    #  - procedure_agent
-    #  - summarizer_agent
-
-  # The NEW Celery Worker Service
-  celery_worker:
-    build:
-      context: ./aura
-      dockerfile: ../Dockerfile.supervisor
-    # This command starts the celery worker process
-    command: ["celery", "-A", "aura", "worker", "-l", "info"]
-    volumes:
-      # Mount the host's ./database folder into the container's /app/database folder
-      - ./database:/app/database
-    environment:
-      - DJANGO_SETTINGS_MODULE=aura.settings
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
-        # CRITICAL: Also needed for the worker if it calls agents directly
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    depends_on:
-      - redis
-
-  # The Identifier Agent Service
-  # identifier_agent:
-  #   build:
-  #     context: ./agents/identifier_agent
-  #     dockerfile: ../../Dockerfile.agent
-  #   ports:
-  #     - "8001:8001"
-  #   command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]
-
-  # The Procedure Agent Service
-  # procedure_agent:
-  #   build:
-  #     context: ./agents/procedure_agent
-  #     dockerfile: ../../Dockerfile.agent
-  #   ports:
-  #     - "8002:8002"
-  #   # We pass the .env file into the container
-  #   env_file:
-  #     - ./agents/procedure_agent/.env
-  #   command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8002"]
-
-  # The Summarizer Agent Service
-  # summarizer_agent:
-  #   build:
-  #     context: ./agents/summarizer_agent
-  #     dockerfile: ../../Dockerfile.agent
-  #   ports:
-  #     - "8003:8003"
-  #   command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8003"]

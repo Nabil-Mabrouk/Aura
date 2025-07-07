@@ -2,12 +2,22 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>AURA Supervisor</title>
+    <title>AURA - AI Unified Response Agent</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Font: Roboto Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* We only need one small style block to set the font globally */
+        body {
+            font-family: 'Roboto Mono', monospace;
+        }
+    </style>
 </head>
-<body class="bg-gray-900 text-gray-200 font-sans">
-    <div class="container mx-auto p-8">
-        <h1 class="text-4xl font-bold text-cyan-400 mb-6 border-b border-gray-700 pb-2">AURA Supervisor</h1>
+<body class="bg-black text-white antialiased">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {% block content %}{% endblock %}
     </div>
 </body>

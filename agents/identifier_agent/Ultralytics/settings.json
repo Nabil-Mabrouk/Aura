@@ -1,0 +1,21 @@
+{
+  "settings_version": "0.0.6",
+  "datasets_dir": "C:\\Projects\\datasets",
+  "weights_dir": "C:\\Projects\\x-Aura\\weights",
+  "runs_dir": "C:\\Projects\\x-Aura\\runs",
+  "uuid": "565db50dc03a1d553be6dbafd9072e5d0490c7e7e5deb1bec5bc39a03a570d30",
+  "sync": true,
+  "api_key": "",
+  "openai_api_key": "",
+  "clearml": true,
+  "comet": true,
+  "dvc": true,
+  "hub": true,
+  "mlflow": true,
+  "neptune": true,
+  "raytune": true,
+  "tensorboard": false,
+  "wandb": false,
+  "vscode_msg": true,
+  "openvino_msg": true
+}

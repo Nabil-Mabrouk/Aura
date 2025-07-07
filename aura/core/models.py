@@ -1,46 +1,63 @@
-# aura_supervisor/models.py
+# Aura/core/models.py
 
 import uuid
 from django.db import models
 
+def user_image_path(instance, filename):
+    # file will be uploaded to MEDIA_ROOT/input_images/<job_id>/<filename>
+    return f'input_images/{instance.job.id}/{filename}'
+
+def aura_image_path(instance, filename):
+    # file will be uploaded to MEDIA_ROOT/annotated_images/<job_id>/<filename>
+    return f'annotated_images/{instance.job.id}/{filename}'
+
 class Job(models.Model):
-    """Represents a single operational task AURA is supervising."""
+    """
+    Represents a single "Session" or operational task AURA is supervising.
+    This is the parent object for a full conversation.
+    """
     class Status(models.TextChoices):
-        PENDING = 'PENDING', 'Pending'
         IN_PROGRESS = 'IN_PROGRESS', 'In Progress'
-        AWAITING_APPROVAL = 'AWAITING_APPROVAL', 'Awaiting Approval'
-        COMPLETED = 'COMPLETED', 'Completed'
-        FAILED = 'FAILED', 'Failed'
+        COMPLETED_SUCCESS = 'COMPLETED_SUCCESS', 'Completed Successfully'
+        COMPLETED_FAILURE = 'COMPLETED_FAILURE', 'Completed with Failure'
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    title = models.CharField(max_length=255, default="New Operational Job")
-    status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
-    identified_component = models.CharField(max_length=255, blank=True, null=True)
-    final_summary = models.TextField(blank=True, null=True)
+    title = models.CharField(max_length=255, default="New AURA Session")
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.IN_PROGRESS)
+    final_report_text = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Job {self.id} - {self.status}"
+        return f"Session {self.id} - {self.status}"
 
-
-class JobLog(models.Model):
-    """Stores a log entry for a specific step in a Job's workflow."""
+class Interaction(models.Model):
+    """
+    Represents a single "turn" in the conversation between the user and Aura,
+    belonging to a specific Job (Session).
+    """
     class Source(models.TextChoices):
-        SUPERVISOR = 'SUPERVISOR', 'Aura Supervisor'
-        IDENTIFIER = 'IDENTIFIER', 'Identifier Agent'
-        PROCEDURE = 'PROCEDURE', 'Procedure Agent'
-        SUMMARIZER = 'SUMMARIZER', 'Summarizer Agent'
         USER = 'USER', 'Human Technician'
+        AURA = 'AURA', 'Aura Assistant'
 
-    job = models.ForeignKey(Job, related_name='logs', on_delete=models.CASCADE)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    job = models.ForeignKey(Job, related_name='interactions', on_delete=models.CASCADE)
     source = models.CharField(max_length=20, choices=Source.choices)
-    message = models.TextField()
+    
+    # User's Input for this turn
+    user_text_input = models.TextField(blank=True, null=True)
+    user_image_input = models.ImageField(upload_to=user_image_path, blank=True, null=True)
+
+    # Aura's Response for this turn
+    aura_text_response = models.TextField(blank=True, null=True)
+    aura_annotated_image = models.ImageField(upload_to=aura_image_path, blank=True, null=True)
+    
+    # Metadata for the turn
     timestamp = models.DateTimeField(auto_now_add=True)
-    metadata = models.JSONField(blank=True, null=True) # To store raw responses
+    parsed_intent = models.CharField(max_length=100, blank=True, null=True) # e.g., "FETCH_PROCEDURE"
 
     class Meta:
         ordering = ['timestamp']
 
     def __str__(self):
-        return f"[{self.timestamp}] [{self.source}] {self.message}"
+        return f"Interaction {self.id} for Job {self.job.id}"

@@ -1,31 +1,42 @@
 # aura/core/services.py
 import requests
+import base64
+from typing import List, Dict, Any
+import json
 
-# --- NEW DOCKER-FRIENDLY ENDPOINTS ---
-# The hostname is now the service name from docker-compose.yml
-# AGENT_ENDPOINTS = {
-#     "identifier": "http://identifier_agent:8001/identify",
-#     "procedure": "http://procedure_agent:8002/get_procedure",
-#     "summarizer": "http://summarizer_agent:8003/summarize"
-# }
+# AGENT_ENDPOINTS now points to the services that will be running on the host machine,
+# launched by the Coral Server. The supervisor container will access them via the
+# special 'host.docker.internal' DNS name.
 AGENT_ENDPOINTS = {
     "identifier": "http://host.docker.internal:8001/identify",
     "procedure": "http://host.docker.internal:8002/get_procedure",
     "summarizer": "http://host.docker.internal:8003/summarize",
-    "command": "http://host.docker.internal:8004/parse_command" # For Day 3
+    "command": "http://host.docker.internal:8004/parse_command", 
+    "annotator": "http://host.docker.internal:8005/annotate",
 }
-# ... the rest of the file remains exactly the same ...
-# (The functions will now use these new URLs)
+
 class AgentInteractionError(Exception):
     """Custom exception for agent communication failures."""
     pass
 
-def call_identifier_agent():
-    """Calls the Identifier Agent via its Docker service name."""
+def call_identifier_agent(image_base64: str) -> Dict[str, Any]:
+    """
+    Calls the upgraded Identifier Agent.
+    
+    Args:
+        image_base64 (str): The base64 encoded image string from the frontend.
+
+    Returns:
+        Dict[str, Any]: The JSON response from the agent, containing detected objects.
+    """
     try:
         url = AGENT_ENDPOINTS["identifier"]
-        print(f"SUPERVISOR: Calling Identifier Agent inside Docker at {url}...")
-        response = requests.post(url, json={'image_placeholder': 'simulated_image.jpg'})
+        print(f"SUPERVISOR: Calling Identifier Agent with image data at {url}...")
+        
+        # The agent now expects a JSON payload with the base64 string.
+        payload = {'image_base64': image_base64}
+        
+        response = requests.post(url, json=payload)
         response.raise_for_status()
         return response.json()
     except requests.RequestException as e:
@@ -52,3 +63,31 @@ def call_summarizer_agent(job_log_text: str):
         return response.json()
     except requests.RequestException as e:
         raise AgentInteractionError(f"Summarizer Agent at {url} failed: {e}")
+
+# New function to call the command agent
+def call_command_agent(history: list, new_text: str, has_image: bool):
+    """Calls the Command Agent to parse user intent with Groq/Llama."""
+    try:
+        url = AGENT_ENDPOINTS["command"]
+        print(f"SUPERVISOR: Calling Command Agent at {url}...")
+        payload = {
+            "history": history,
+            "new_text": new_text,
+            "has_image": has_image,
+        }
+        response = requests.post(url, json=payload)
+        response.raise_for_status()
+        # Get the raw text from the response body.
+        return response.text
+    except json.JSONDecodeError as e:
+        raise AgentInteractionError(f"Command Agent returned invalid JSON: {response.text}")
+def call_annotator_agent(image_base64: str, boxes: list):
+    try:
+        url = AGENT_ENDPOINTS["annotator"]
+        print(f"SUPERVISOR: Calling Annotator Agent at {url}...")
+        payload = {"image_base64": image_base64, "boxes": boxes}
+        response = requests.post(url, json=payload)
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException as e:
+        raise AgentInteractionError(f"Annotator Agent at {url} failed: {e}")
