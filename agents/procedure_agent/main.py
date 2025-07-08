@@ -42,6 +42,8 @@ SNOWFLAKE_CREDS = {
     "warehouse": os.getenv("SNOWFLAKE_WAREHOUSE"),
     "database": os.getenv("SNOWFLAKE_DATABASE"),
     "schema": os.getenv("SNOWFLAKE_SCHEMA"),
+    "login_timeout": 30, 
+    "network_timeout": 30,
 }
 
 # --- FastAPI Setup ---
@@ -52,48 +54,43 @@ app = FastAPI(
     title="AURA Procedure Agent (Snowflake-Connected)",
     description="Fetches SOPs directly from an enterprise Snowflake data warehouse."
 )
-def get_procedure_from_snowflake(component_name: str):
-    """Primary Method: Tries to fetch the procedure from Snowflake."""
-    print("PROCEDURE AGENT: Attempting to fetch from Snowflake (Primary)...")
-    conn = None
+def get_from_snowflake(component_name: str):
+    """Primary Method: Tries to fetch from Snowflake."""
+    print(f"PROCEDURE AGENT: Attempting to fetch '{component_name}' from Snowflake (Primary)...")
     try:
-        conn = snowflake.connector.connect(**SNOWFLAKE_CREDS)
-        with conn.cursor() as cur:
-            query = "SELECT procedure_id, steps, safety_warnings FROM PROCEDURES WHERE component_name = %s"
-            cur.execute(query, (component_name,))
-            result = cur.fetchone()
-        conn.close()
-        
+        with snowflake.connector.connect(**SNOWFLAKE_CREDS) as conn:
+            with conn.cursor() as cur:
+                query = "SELECT procedure_id, steps, safety_warnings FROM PROCEDURES WHERE component_name ILIKE %s"
+                cur.execute(query, (component_name,)) # Use ILIKE for case-insensitive search
+                result = cur.fetchone()
         if result:
             print("PROCEDURE AGENT: Success! Found procedure in Snowflake.")
             procedure_id, steps_json, warnings_json = result
             return {
-                "procedure_id": procedure_id,
-                "steps": json.loads(steps_json),
-                "safety_warnings": json.loads(warnings_json),
+                "status": "success",
+                "data": {
+                    "procedure_id": procedure_id,
+                    "steps": json.loads(steps_json),
+                    "safety_warnings": json.loads(warnings_json),
+                },
                 "source": "Snowflake (Live)"
             }
-        return None
+        return None # Return None if not found, to trigger fallback
     except Exception as e:
         print(f"PROCEDURE AGENT: Snowflake connection failed: {e}")
-        if conn and not conn.is_closed():
-            conn.close()
-        return None
+        return None # Return None on any failure, to trigger fallback
 
-def get_procedure_from_local_db(component_name: str):
-    """Fallback Method: Tries to fetch from the local SQLite DB via an API call to the Supervisor."""
-    print("PROCEDURE AGENT: Fallback! Attempting to fetch from local cache via Supervisor API...")
+def get_from_local_db(component_name: str):
+    """Fallback Method: Tries to fetch from the local SQLite cache."""
+    print(f"PROCEDURE AGENT: Fallback! Attempting to fetch '{component_name}' from local cache...")
     try:
-        # The supervisor needs a new API endpoint to expose this data
-        # We assume the supervisor runs on the host from the agent's perspective
-        supervisor_api_url = "http://host.docker.internal:8000/app/api/local_procedure/"
-        response = requests.get(supervisor_api_url, params={'component_name': component_name})
-        response.raise_for_status()
-        
-        data = response.json()
-        print("PROCEDURE AGENT: Success! Found procedure in local cache.")
-        data['source'] = "Local Cache (Offline)"
-        return data
+        response = requests.get(SUPERVISOR_API_URL, params={'component_name': component_name}, timeout=5)
+        if response.status_code == 200:
+            print("PROCEDURE AGENT: Success! Found procedure in local cache.")
+            data = response.json()
+            data['source'] = "Local Cache (Offline)"
+            return { "status": "success", "data": data }
+        return None # Return None if not found (e.g., 404 from supervisor)
     except Exception as e:
         print(f"PROCEDURE AGENT: Local cache fetch failed: {e}")
         return None
@@ -102,17 +99,23 @@ def get_procedure_from_local_db(component_name: str):
 async def get_procedure(request: ComponentRequest):
     component = request.component_name
     
-    # Try online source first
-    procedure_data = get_procedure_from_snowflake(component)
+    # 1. Try online source first
+    procedure_data = get_from_snowflake(component)
     
-    # If it fails, try the offline fallback
+    # 2. If it fails, try the offline fallback
     if not procedure_data:
-        procedure_data = get_procedure_from_local_db(component)
+        procedure_data = get_from_local_db(component)
 
+    # 3. If BOTH sources fail, return a graceful "not found" message.
     if not procedure_data:
-        raise HTTPException(status_code=404, detail="Procedure not found in any data source.")
+        print(f"PROCEDURE AGENT: Procedure for '{component}' not found in any data source.")
+        return {
+            "status": "error",
+            "message": f"No procedure found for component '{component}' in any available knowledge base."
+        }
         
+    # 4. If either source succeeded, return the data.
     return procedure_data
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8002)
+    uvicorn.run(app, host="0.0.0.0", port=8002)
