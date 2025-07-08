@@ -151,15 +151,32 @@ def handle_interaction_api(request, job_id):
         print(f"--- INTERACTION START for Job {job_id} ---")
 
         chat_history = []
-        for inter in job.interactions.order_by('timestamp'):
+        # Get all interactions EXCEPT the one we just created
+        previous_interactions = job.interactions.exclude(id=user_interaction.id).order_by('timestamp')
+
+        for inter in previous_interactions:
             if inter.user_text_input:
                 chat_history.append(HumanMessage(content=inter.user_text_input))
             if inter.aura_text_response:
                 chat_history.append(AIMessage(content=inter.aura_text_response))
         
-        agent_input = {"input": user_text, "chat_history": chat_history}
+        final_input_string = user_text
+
         if user_interaction.user_image_input:
-            agent_input["input"] += f"\n\n[CONTEXT: An image was provided for this turn. The interaction ID is: {user_interaction.id}]"
+            # We are now explicitly telling the LLM the ID it MUST use.
+            final_input_string += f"\n\n[SYSTEM CONTEXT: An image has been provided for this turn. To analyze it, you MUST call the `identify_objects_in_image` tool with this exact ID: '{user_interaction.id}']"
+
+        # 3. Prepare the main input for the agent executor
+        agent_input = {
+            "input": user_text, 
+            "chat_history": chat_history,
+            # --- THIS IS THE FIX ---
+            # Pass the interaction_id at the top level of the input.
+            # The agent can now access this value.
+            #"interaction_id": str(user_interaction.id)
+        }
+        # if user_interaction.user_image_input:
+        #     agent_input["input"] += f"\n\n[CONTEXT: An image was provided for this turn. The interaction ID is: {user_interaction.id}]"
 
         print(f"Invoking AURA LangChain Agent Executor...")
         response = aura_agent_executor.invoke(agent_input)
