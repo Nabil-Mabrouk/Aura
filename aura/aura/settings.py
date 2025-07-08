@@ -31,7 +31,7 @@ SECRET_KEY = 'django-insecure-j!%n0w#46u4e0tv4dwwlm^yfz+b8wcn^_y_ff-$93t&fo#lx)q
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 ON_DEVICE = True # <--- Set to True for offline, False for online/CDN
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['aura-copilot.com', 'localhost', '127.0.0.1', '[::1]', 'www.aura-copilot.com', '95.179.217.110']
 
 # --- NEW: Groq API Key Setting ---
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
