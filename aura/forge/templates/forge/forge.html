@@ -1,0 +1,75 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<header class="flex justify-between items-center mb-8 pb-4 border-b border-gray-800">
+    <div>
+        <h2 class="text-4xl font-bold tracking-tighter">AURA Forge</h2>
+        <p class="text-gray-400">Train AURA's Vision Model for Your Custom Equipment</p>
+    </div>
+    <a href="{% url 'core:job_list' %}" class="text-sm text-gray-400 hover:text-white transition-colors">← Back to Sessions</a>
+</header>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <!-- Step 1: Input -->
+    <div class="bg-gray-900 border border-gray-800 rounded-lg p-4">
+        <h3 class="text-xl font-bold text-cyan-400 mb-4">[ 1. PROVIDE SEED IMAGE ]</h3>
+        <p class="text-sm text-gray-500 mb-2">Upload a clear photo of the equipment you want to teach AURA.</p>
+        <input type="file" id="seed-image-upload" class="...">
+        <textarea id="item-description" class="w-full mt-2 bg-black border border-gray-700 p-2 text-white" placeholder="Describe the item, e.g., 'Model 7B industrial water pump'"></textarea>
+        <button id="generate-btn" class="btn btn-primary w-full mt-4">Generate Synthetic Dataset</button>
+    </div>
+
+    <!-- Step 2: Generated Dataset -->
+    <div class="md:col-span-2 bg-gray-900 border border-gray-800 rounded-lg p-4">
+        <h3 class="text-xl font-bold text-cyan-400 mb-4">[ 2. REVIEW SYNTHETIC DATASET ]</h3>
+        <p class="text-sm text-gray-500 mb-2">AURA's Generator Agent has created these images from different perspectives.</p>
+        <div id="dataset-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 h-64 overflow-y-auto bg-black p-2 border border-gray-700">
+            <!-- Placeholder for generated images -->
+            <div class="flex items-center justify-center text-gray-600 h-24 border border-dashed border-gray-700">Awaiting...</div>
+        </div>
+    </div>
+</div>
+
+<!-- Step 3: The "Pipeline" Buttons -->
+<div class="mt-8 box text-center">
+    <h3 class="text-xl font-bold text-cyan-400 mb-4">[ 3. MODEL TRAINING PIPELINE ]</h3>
+    <div class="flex justify-center items-center space-x-4">
+        <button class="btn text-lg" disabled>1. Label Dataset</button>
+        <span class="text-gray-600">→</span>
+        <button class="btn text-lg" disabled>2. Train Model</button>
+        <span class="text-gray-600">→</span>
+        <button class="btn text-lg" disabled>3. Test Accuracy</button>
+        <span class="text-gray-600">→</span>
+        <button class="btn text-lg" disabled>4. Deploy to Agents</button>
+    </div>
+    <p class="text-xs text-gray-600 mt-2">// Pipeline steps are for demonstration purposes.</p>
+</div>
+
+<script>
+// JavaScript to handle the button click
+const generateBtn = document.getElementById('generate-btn');
+const datasetGrid = document.getElementById('dataset-grid');
+
+generateBtn.addEventListener('click', () => {
+    // In a real app, this would make an API call to the Generator Agent.
+    // For the demo, we just populate the grid with pre-made placeholder images.
+    datasetGrid.innerHTML = ''; // Clear the placeholder
+    
+    // Simulate receiving 10 images
+    for (let i = 1; i <= 10; i++) {
+        const imgContainer = document.createElement('div');
+        imgContainer.className = 'bg-black border border-gray-700 p-1';
+        const img = document.createElement('img');
+        // Use a placeholder service like placeholder.com
+        img.src = `https://via.placeholder.com/150/111111/FFFFFF?text=View+${i}`;
+        imgContainer.appendChild(img);
+        datasetGrid.appendChild(imgContainer);
+    }
+    
+    // Enable the next button in the pipeline
+    // This makes the demo feel interactive
+    document.querySelector('.btn[disabled]').disabled = false;
+    document.querySelector('.btn[disabled]').classList.add('btn-primary');
+});
+</script>
+{% endblock %}

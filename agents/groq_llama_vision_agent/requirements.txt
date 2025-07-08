@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+pydantic
+groq
+python-dotenv
+Pillow
+python-base64

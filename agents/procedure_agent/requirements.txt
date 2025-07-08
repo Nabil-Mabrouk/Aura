@@ -4,7 +4,7 @@ pydantic==2.11.7
 pydantic_core==2.33.2
 starlette==0.46.2
 typing_extensions==4.14.1
-
+requests 
 # Uvicorn server
 uvicorn==0.35.0
 h11==0.16.0

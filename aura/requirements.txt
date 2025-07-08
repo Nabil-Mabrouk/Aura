@@ -20,8 +20,13 @@ gunicorn==22.0.0 # Pinning a recent gunicorn version
 # redis
 
 groq
+langchain
+langchain-core
+langchain-groq
 python-dotenv
 
 ultralytics
 opencv-python-headless
 Pillow
+
+python-magic

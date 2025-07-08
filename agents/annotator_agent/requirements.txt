@@ -1,4 +1,5 @@
 fastapi
 uvicorn
-Pillow
-python-base64
+pydantic
+opencv-python-headless
+numpy

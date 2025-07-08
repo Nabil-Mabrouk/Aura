@@ -13,6 +13,7 @@ AGENT_ENDPOINTS = {
     "summarizer": "http://host.docker.internal:8003/summarize",
     "command": "http://host.docker.internal:8004/parse_command", 
     "annotator": "http://host.docker.internal:8005/annotate",
+    "groq_llama_vision": "http://host.docker.internal:8006/identify",
 }
 
 class AgentInteractionError(Exception):
@@ -33,6 +34,29 @@ def call_identifier_agent(image_base64: str) -> Dict[str, Any]:
         url = AGENT_ENDPOINTS["identifier"]
         print(f"SUPERVISOR: Calling Identifier Agent with image data at {url}...")
         
+        # The agent now expects a JSON payload with the base64 string.
+        payload = {'image_base64': image_base64}
+        
+        response = requests.post(url, json=payload)
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException as e:
+        raise AgentInteractionError(f"Identifier Agent at {url} failed: {e}")
+    
+def call_groq_llama_vision_agent(image_base64: str) -> Dict[str, Any]:
+    """
+    Calls the upgraded Identifier Agent.
+    
+    Args:
+        image_base64 (str): The base64 encoded image string from the frontend.
+
+    Returns:
+        Dict[str, Any]: The JSON response from the agent, containing detected objects.
+    """
+    try:
+        url = AGENT_ENDPOINTS["groq_llama_vision"]
+        print(f"SUPERVISOR: Calling Groq Llama Vision Agent with image data at {url}...")
+
         # The agent now expects a JSON payload with the base64 string.
         payload = {'image_base64': image_base64}
         

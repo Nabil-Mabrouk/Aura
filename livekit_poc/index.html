@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AURA - Vision Agent Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
+    <style>
+        body { font-family: sans-serif; background: #222; color: #eee; padding: 2em; }
+        h1, h3 { font-weight: 300; }
+        .container { display: flex; gap: 20px; }
+        .video-wrapper { display: flex; flex-direction: column; }
+        video { width: 640px; height: 480px; border: 1px solid #444; background: #000; }
+    </style>
+</head>
+<body>
+    <h1>AURA Vision Agent Test</h1>
+    <p><b>Status:</b> <span id="status">Not Connected</span></p>
+    <div class="container">
+        <div class="video-wrapper">
+            <h3>Your Camera</h3>
+            <video id="local-video" autoplay muted playsinline></video>
+        </div>
+        <div class="video-wrapper">
+            <h3>Agent's Processed View</h3>
+            <video id="agent-video" autoplay playsinline></video>
+        </div>
+    </div>
+    
+    <script>
+        const LIVEKIT_URL = "wss://aura-mbomsbgg.livekit.cloud";
+        const TOKEN_SERVER_URL = "http://127.0.0.1:5001"; 
+
+        async function init() {
+            const statusEl = document.getElementById('status');
+            
+            try {
+                if (typeof LivekitClient === 'undefined') {
+                    throw new Error("LiveKit client library did not load correctly.");
+                }
+
+                const { Room, RoomEvent, RemoteParticipant, Track } = LivekitClient;
+
+                statusEl.textContent = "Fetching token...";
+                const resp = await fetch(`${TOKEN_SERVER_URL}/get-token`);
+                const data = await resp.json();
+                const token = data.token;
+                
+                statusEl.textContent = "Token received. Connecting to LiveKit...";
+                const room = new Room();
+                
+                await room.connect(LIVEKIT_URL, token);
+                statusEl.textContent = `Connected to room: ${room.name}`;
+
+                room.on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
+                    if (track.kind === 'video') {
+                        if (participant instanceof RemoteParticipant) {
+                            const agentVideoEl = document.getElementById('agent-video');
+                            track.attach(agentVideoEl);
+                        }
+                    }
+                });
+                
+                await room.localParticipant.setCameraEnabled(true, { width: 640, height: 480 });
+                
+                // --- THIS SECTION IS CORRECTED ---
+                const localVideoEl = document.getElementById('local-video');
+                // Access Track.Source through the main LivekitClient object
+                const localPub = room.localParticipant.getTrackPublication(Track.Source.Camera); 
+                if (localPub?.track) {
+                    localPub.track.attach(localVideoEl);
+                }
+
+            } catch (error) {
+                console.error("Connection or initialization failed:", error);
+                statusEl.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>

@@ -1,30 +1,174 @@
-{% extends "core/base.html" %}
+{% load static %} 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AURA - AI Unified Response Agent</title>
+    <script src="{% static 'js/tailwind.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/local-fonts.css' %}">
 
-{% block content %}
-<div class="flex flex-col items-center justify-center min-h-[85vh] text-center">
-    
-    <h1 class="text-6xl md:text-8xl font-bold tracking-tighter">
-        AURA
-    </h1>
-
-    <p class="mt-4 text-xl text-gray-300 max-w-3xl mx-auto">
-        The AI-Powered Supervisor for High-Stakes Enterprise Operations.
-    </p>
-    <p class="mt-2 text-md text-gray-500 max-w-2xl mx-auto">
-        Orchestrating a team of specialized AI agents to see, listen, think, and speak.
-    </p>
-
-    <div class="mt-12">
-        <form action="{% url 'core:create_job_session' %}" method="post">
-            {% csrf_token %}
-            <button type="submit" class="bg-white text-black font-bold text-xl px-10 py-4 rounded-md shadow-lg transform hover:scale-105 transition-transform duration-300">
-                Start New Session
-            </button>
-        </form>
+    <style>
+        /* We only need one small style block to set the font globally */
+        body {
+            font-family: 'Roboto Mono', monospace;
+            overflow-x: hidden;
+            background-color: #000;
+            color: #fff;
+        }
+        
+        .background-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .background-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('{% static 'images/background.png' %}');
+            background-size: cover;
+            background-position: center;
+            animation: zoomEffect 45s ease-in-out infinite;
+            filter: brightness(0.7);
+        }
+        
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.65); /* Adjust opacity here */
+            z-index: 1;
+        }
+        
+        @keyframes zoomEffect {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fadeInUp {
+            animation: fadeInUp 1.2s ease-out forwards;
+            opacity: 0;
+        }
+        
+        .delay-100 {
+            animation-delay: 0.1s;
+        }
+        
+        .delay-200 {
+            animation-delay: 0.2s;
+        }
+        
+        .delay-300 {
+            animation-delay: 0.3s;
+        }
+        
+        .delay-400 {
+            animation-delay: 0.4s;
+        }
+        
+        .btn-hover {
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn-hover:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+        
+        .terminal-text {
+            font-family: 'Source Code Pro', monospace;
+            letter-spacing: -0.5px;
+        }
+        
+        .text-glow {
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- Background with zoom effect and overlay -->
+    <div class="background-container">
+        <div class="background-image"></div>
+        <div class="overlay"></div>
     </div>
-</div>
+    
+    <!-- Main Content -->
+    <div class="flex flex-col items-center justify-center min-h-screen text-center px-4">
+        <div class="max-w-4xl mx-auto">
+            <!-- Logo -->
+            <div class="animate-fadeInUp delay-100">
+                <div class="text-5xl md:text-7xl font-bold tracking-tighter terminal-text">
+                    AURA
+                </div>
+                <div class="w-24 h-1 bg-white mx-auto mt-4 mb-6"></div>
+            </div>
+            
+            <!-- Tagline -->
+            <h1 class="text-2xl md:text-3xl mt-8 mb-6 text-gray-200 animate-fadeInUp delay-200">
+                The AI-Powered Supervisor for<br>High-Stakes Enterprise Operations
+            </h1>
+            
+            <!-- Description -->
+            <p class="text-gray-400 max-w-2xl mx-auto animate-fadeInUp delay-300">
+                Orchestrating a team of specialized AI agents to see, listen, think, and speak
+            </p>
+            
+            <!-- Start Button -->
+            <div class="mt-16 animate-fadeInUp delay-400">
+                <form action="{% url 'core:create_job_session' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="bg-white text-black font-bold text-xl px-10 py-4 rounded-md shadow-lg transform hover:scale-105 transition-transform duration-300">
+                        Start New Session
+                    </button>
+                </form>
+            </div>
 
-<footer class="absolute bottom-4 w-full text-center text-xs text-gray-700">
-    <p>A RAISE Your HACK Project by Nabil Mabrouk</p>
-</footer>
-{% endblock %}
+
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="absolute bottom-6 w-full text-center text-xs text-gray-500 animate-fadeInUp delay-500">
+        <p>A RAISE Your HACK Project by Nabil Mabrouk</p>
+    </footer>
+    
+    <!-- Decorative elements -->
+    <div class="absolute top-8 left-8 w-4 h-4 border border-white animate-fadeInUp delay-100"></div>
+    <div class="absolute top-8 right-8 w-4 h-4 border border-white animate-fadeInUp delay-100"></div>
+    <div class="absolute bottom-8 left-8 w-4 h-4 border border-white animate-fadeInUp delay-100"></div>
+    <div class="absolute bottom-8 right-8 w-4 h-4 border border-white animate-fadeInUp delay-100"></div>
+    
+    <!-- Animated lines -->
+    <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-px h-20 bg-gradient-to-b from-white to-transparent"></div>
+    <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-px h-20 bg-gradient-to-t from-white to-transparent"></div>
+</body>
+</html>

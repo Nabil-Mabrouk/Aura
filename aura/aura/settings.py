@@ -30,7 +30,7 @@ SECRET_KEY = 'django-insecure-j!%n0w#46u4e0tv4dwwlm^yfz+b8wcn^_y_ff-$93t&fo#lx)q
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
+ON_DEVICE = True # <--- Set to True for offline, False for online/CDN
 ALLOWED_HOSTS = []
 
 # --- NEW: Groq API Key Setting ---
@@ -50,7 +50,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'core',
-    'landing'
+    'landing',
+    'forge'
 ]
 
 MIDDLEWARE = [
@@ -75,6 +76,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                # 'django.template.context_processors.settings',
             ],
         },
     },
@@ -135,11 +137,21 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
+# https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = 'static/'
 
-# The absolute path to the directory where user-uploaded files will be stored.
+# Tell Django where to look for static files that aren't tied to a specific app.
+# We will create this directory in the next step.
+STATICFILES_DIRS = [
+    BASE_DIR / "static", # A project-wide static directory
+]
+
+# This is where `collectstatic` will place all files for production deployment.
+# It's good practice to define it now.
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+
 
 MEDIA_ROOT = BASE_DIR / 'media'
 # The URL that handles the media served from MEDIA_ROOT.
@@ -152,3 +164,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # --- CELERY SETTINGS ---
 # We use the service name 'redis' from our docker-compose.yml
+# NEW: Add a flag for on-device/offline mode.
+# In a real production setup, you would likely set this from an environment variable.
+# Example: ON_DEVICE = os.getenv('ON_DEVICE', 'False').lower() in ('true', '1')

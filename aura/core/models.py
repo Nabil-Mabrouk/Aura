@@ -61,3 +61,21 @@ class Interaction(models.Model):
 
     def __str__(self):
         return f"Interaction {self.id} for Job {self.job.id}"
+
+# Aura/core/models.py
+# ... (at the end of the file, after your Job and Interaction models) ...
+
+class Procedure(models.Model):
+    """
+    A local cache of an operational procedure, synced from a primary
+    source like Snowflake. Used as a resilient offline fallback.
+    """
+    procedure_id = models.CharField(max_length=50, primary_key=True)
+    component_name = models.CharField(max_length=255, unique=True)
+    # JSONField is perfect for storing lists of steps and warnings
+    steps = models.JSONField(default=list)
+    safety_warnings = models.JSONField(default=list)
+    last_synced = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.procedure_id}: {self.component_name}"

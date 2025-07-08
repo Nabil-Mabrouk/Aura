@@ -1,18 +1,4 @@
-# aura_supervisor/urls.py
 # core/urls.py
-# from django.urls import path
-# from . import views
-
-# app_name = 'core' # <-- Add this for namespacing
-
-# urlpatterns = [
-#     path('', views.job_list, name='job_list'),
-#     path('job/new/', views.create_and_run_job, name='create_and_run_job'),
-#     path('job/<uuid:job_id>/', views.job_detail, name='job_detail'),
-#     path('api/job/<uuid:job_id>/log/', views.job_detail_log_api, name='job_detail_log_api'),
-#     # New endpoint for handling voice commands from the frontend
-#     path('api/job/<uuid:job_id>/voice_command/', views.handle_voice_command, name='handle_voice_command'),
-# ]
 
 # Aura/core/urls.py
 from django.urls import path
@@ -35,4 +21,9 @@ urlpatterns = [
     # --- ADD THIS NEW ENDPOINT ---
     # This is the main endpoint for all back-and-forth conversation
     path('api/job/<uuid:job_id>/interact/', views.handle_interaction_api, name='handle_interaction_api'),
+
+    path('job/<uuid:job_id>/end/<str:outcome>/', views.end_session, name='end_session'),
+    path('job/<uuid:job_id>/delete/', views.delete_session, name='delete_session'),
+
+    path('api/local_procedure/', views.local_procedure_api, name='local_procedure_api'),
 ]

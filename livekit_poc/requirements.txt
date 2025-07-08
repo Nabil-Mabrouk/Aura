@@ -1,0 +1,9 @@
+livekit-agents
+livekit-api
+flask
+python-dotenv
+livekit-plugins-groq
+livekit-plugins-silero
+Flask-Cors
+opencv-python-headless
+numpy

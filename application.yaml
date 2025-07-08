@@ -1,8 +1,3 @@
-# Note: PROJECT_DIR needs to be the absolute path to your aura_project folder
-# Example for Windows: "C:/Projects/x-Aura/aura_project"
-# Example for Mac/Linux: "/Users/yourname/Documents/aura_project"
-PROJECT_DIR: "C:\Projects\x-Aura>"
-
 applications:
   - id: "aura-app"
     name: "AURA Supervisor Application"
@@ -10,19 +5,58 @@ applications:
 
 registry:
   aura-identifier-agent:
+    options: []
     runtime:
       type: "executable"
-      command: ["bash", "-c", "source ${PROJECT_DIR}/venv/bin/activate && uvicorn main:app --host 127.0.0.1 --port 8001"]
-      workingDirectory: "${PROJECT_DIR}/agents/identifier_agent"
+      command: ["bash", "-c", "cd ../agents/identifier_agent && ../../venv/Scripts/python.exe -m uvicorn main:app --host 127.0.0.1 --port 8001"]
+      environment:
+        - name: "USERPROFILE"
+          value: "%USERPROFILE%"
 
+  # This agent definition is now clean and portable.
   aura-procedure-agent:
+    options: []
     runtime:
       type: "executable"
-      command: ["bash", "-c", "source ${PROJECT_DIR}/venv/bin/activate && uvicorn main:app --host 127.0.0.1 --port 8002"]
-      workingDirectory: "${PROJECT_DIR}/agents/procedure_agent"
+      command: ["bash", "-c", "cd ../agents/procedure_agent && ../../venv/Scripts/python.exe -m uvicorn main:app --host 127.0.0.1 --port 8002"]
+      environment:
+        - name: "USERPROFILE"
+          value: "%USERPROFILE%"
 
   aura-summarizer-agent:
+    options: []
     runtime:
       type: "executable"
-      command: ["bash", "-c", "source ${PROJECT_DIR}/venv/bin/activate && uvicorn main:app --host 127.0.0.1 --port 8003"]
-      workingDirectory: "${PROJECT_DIR}/agents/summarizer_agent"
+      command: ["bash", "-c", "cd ../agents/summarizer_agent && ../../venv/Scripts/python.exe -m uvicorn main:app --host 127.0.0.1 --port 8003"]
+      environment:
+        - name: "USERPROFILE"
+          value: "%USERPROFILE%"
+
+  # New agent registration
+  aura-command-agent:
+    options: []
+    runtime:
+      type: "executable"
+      command: ["bash", "-c", "cd ../agents/command_agent && ../../venv/Scripts/python.exe -m uvicorn main:app --host 0.0.0.0 --port 8004"]
+      environment:
+        - name: "USERPROFILE"
+          value: "%USERPROFILE%"
+  
+  aura-annotator-agent:
+    options: []
+    runtime:
+      type: "executable"
+      command: ["bash", "-c", "cd ../agents/annotator_agent && ../../venv/Scripts/python.exe -m uvicorn main:app --host 0.0.0.0 --port 8005"]
+      environment:
+        - name: "USERPROFILE"
+          value: "%USERPROFILE%"
+
+  # New Groq Llama Vision Agent registration
+  aura-groq-llama-vision-agent:
+    options: []
+    runtime:
+      type: "executable"
+      command: ["bash", "-c", "cd ../agents/groq_llama_vision_agent && ../../venv/Scripts/python.exe -m uvicorn main:app --host 0.0.0.0 --port 8006"]
+      environment:
+        - name: "USERPROFILE"
+          value: "%USERPROFILE%" 

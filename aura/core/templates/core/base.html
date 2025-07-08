@@ -1,14 +1,12 @@
+{% load static %} 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>AURA - AI Unified Response Agent</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Font: Roboto Mono -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="{% static 'js/tailwind.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/local-fonts.css' %}">
+
     <style>
         /* We only need one small style block to set the font globally */
         body {
@@ -16,7 +14,7 @@
         }
     </style>
 </head>
-<body class="bg-black text-white antialiased">
+<body class="bg-black  text-white antialiased bg-transparent-200">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {% block content %}{% endblock %}
     </div>

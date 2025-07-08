@@ -1,0 +1,27 @@
+/* Aura/static/css/local-fonts.css */
+
+/* --- Roboto Mono Regular --- */
+@font-face {
+  font-family: 'Roboto Mono';
+  font-style: normal;
+  font-weight: 400; /* Regular weight */
+  src: url('../fonts/RobotoMono-Regular.ttf') format('truetype'); /* Adjust filename if needed */
+}
+
+/* --- Roboto Mono Medium --- */
+@font-face {
+  font-family: 'Roboto Mono';
+  font-style: normal;
+  font-weight: 500; /* Medium weight */
+  src: url('../fonts/RobotoMono-Medium.ttf') format('truetype'); /* Adjust filename if needed */
+}
+
+/* --- Roboto Mono Bold --- */
+@font-face {
+  font-family: 'Roboto Mono';
+  font-style: normal;
+  font-weight: 700; /* Bold weight */
+  src: url('../fonts/RobotoMono-Bold.ttf') format('truetype'); /* Adjust filename if needed */
+}
+
+/* Add more rules for italic versions if you have them, e.g., font-style: italic; */
